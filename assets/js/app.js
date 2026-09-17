@@ -73,22 +73,7 @@
     elTempo.textContent = sel.length + (sel.length>1 ? ' serviços' : ' serviço') + ' · cerca de ' + txt;
   }
 
-  caixa.addEventListener('change', function(e){
-    /* corte normal e corte promocional são o mesmo serviço: só um por vez */
-    var alvo = e.target;
-    if(alvo && alvo.checked){
-      var i = parseInt(alvo.dataset.i,10);
-      var nome = servicos[i].nome;
-      if(nome.indexOf('Corte masculino') === 0 || nome.indexOf('Corte promocional') === 0){
-        [].forEach.call(caixa.querySelectorAll('input'), function(c){
-          if(c === alvo) return;
-          var n = servicos[parseInt(c.dataset.i,10)].nome;
-          if(n.indexOf('Corte masculino') === 0 || n.indexOf('Corte promocional') === 0) c.checked = false;
-        });
-      }
-    }
-    atualizar();
-  });
+  caixa.addEventListener('change', atualizar);
   atualizar();
 
   document.getElementById('enviar').addEventListener('click', function(){
