@@ -26,6 +26,7 @@
     <a class="marca" href="#topo"><img src="assets/img/logo.webp" alt="Henrique Barber Shop"><span class="nome-marca">Henrique Barber Shop</span></a>
     <nav class="menu">
       <a href="#servicos">Serviços</a>
+      <a href="#produtos">Produtos</a>
       <a href="#agendar">Agendar</a>
       <a href="#casa">A barbearia</a>
       <a href="#onde">Onde fica</a>
@@ -132,10 +133,13 @@
     <p>Marque o que você vai fazer, escolha o dia e mande direto no WhatsApp do Henrique. A mensagem já vai pronta.</p>
 
     <div class="painel">
-      <div class="opcoes" id="opcoes"></div>
+      <div>
+        <div class="opcoes" id="opcoes"></div>
+        <div class="opcoes" id="opcoes-produtos" style="margin-top:22px"></div>
+      </div>
 
       <div class="resumo">
-        <h3>Seu horário</h3>
+        <h3>Seu pedido</h3>
         <div class="campo">
           <label for="nome">Seu nome</label>
           <input id="nome" type="text" placeholder="Como o Henrique te chama" autocomplete="name">
@@ -169,6 +173,48 @@
         <button class="btn" id="enviar" type="button">Enviar no WhatsApp</button>
         <p class="aviso">A confirmação vem pela resposta do Henrique. Valores podem variar conforme o cabelo.</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="produtos" id="produtos">
+  <div class="wrap reveal">
+    <p class="olho">Na barbearia</p>
+    <h2>Produtos</h2>
+    <p>Leve junto com o corte. Pode reservar pelo agendamento aqui embaixo e pagar na hora do atendimento.</p>
+    <div class="vitrine" id="lista-produtos">
+      <article class="prod" data-produto="Pomada extra forte" data-preco="20">
+        <div class="foto"><img src="assets/img/prod-pomada.webp" alt="Pomada extra forte" loading="lazy"></div>
+        <div class="corpo">
+          <h3>Pomada extra forte</h3>
+          <p>Pomada da casa, efeito matte e fixação de longa duração.</p>
+          <p class="preco">R$ 20</p>
+        </div>
+      </article>
+      <article class="prod" data-produto="Perfume importado" data-preco="49.9">
+        <div class="foto"><img src="assets/img/prod-perfumes.webp" alt="Perfume importado" loading="lazy"></div>
+        <div class="corpo">
+          <h3>Perfume importado</h3>
+          <p>Linha árabe: Asad, Bourbon, Club de Nuit, Sabah Al Ward e Pride of Lattafa.</p>
+          <p class="preco">R$ 49,90</p>
+        </div>
+      </article>
+      <article class="prod" data-produto="Minoxidil 50 mg/mL" data-preco="65">
+        <div class="foto"><img src="assets/img/prod-minoxidil.webp" alt="Minoxidil 50 mg/mL" loading="lazy"></div>
+        <div class="corpo">
+          <h3>Minoxidil 50 mg/mL</h3>
+          <p>Solução spray para uso capilar, refil. Uso adulto masculino.</p>
+          <p class="preco">R$ 65</p>
+        </div>
+      </article>
+      <article class="prod" data-produto="Shampoo de cetoconazol 20 mg/mL" data-preco="30">
+        <div class="foto"><img src="assets/img/prod-shampoo.webp" alt="Shampoo de cetoconazol 20 mg/mL" loading="lazy"></div>
+        <div class="corpo">
+          <h3>Shampoo de cetoconazol 20 mg/mL</h3>
+          <p>Shampoo anticaspa para dermatite seborreica. Todos os tipos de cabelo.</p>
+          <p class="preco">R$ 30</p>
+        </div>
+      </article>
     </div>
   </div>
 </section>

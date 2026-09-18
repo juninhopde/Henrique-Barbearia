@@ -24,25 +24,42 @@
     document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('visivel'); });
   }
 
-  /* monta as opções a partir dos cards de serviço — fonte única de verdade */
-  var servicos = [].map.call(document.querySelectorAll('#lista-servicos .srv'), function(el){
-    return {
-      nome: el.dataset.servico,
-      preco: parseFloat(el.dataset.preco),
-      min: parseInt(el.dataset.min,10)
-    };
-  });
+  /* monta as opções a partir dos cards — fonte única de verdade */
+  function ler(sel, attr){
+    return [].map.call(document.querySelectorAll(sel), function(el){
+      return {
+        nome: el.dataset[attr],
+        preco: parseFloat(el.dataset.preco),
+        min: el.dataset.min ? parseInt(el.dataset.min,10) : 0
+      };
+    });
+  }
+  var servicos = ler('#lista-servicos .srv', 'servico');
+  var produtos = ler('#lista-produtos .prod', 'produto');
 
-  var caixa = document.getElementById('opcoes');
-  servicos.forEach(function(s,i){
-    var l = document.createElement('label');
-    l.className = 'op';
-    l.innerHTML = '<input type="checkbox" data-i="'+i+'">'
-      + '<span class="nome"></span>'
-      + '<span class="val">R$ '+s.preco.toFixed(0)+'</span>';
-    l.querySelector('.nome').textContent = s.nome;
-    caixa.appendChild(l);
-  });
+  function moeda(v){
+    return 'R$ ' + (v % 1 ? v.toFixed(2).replace('.',',') : v.toFixed(0));
+  }
+
+  function montar(caixa, itens, titulo, prefixo){
+    var t = document.createElement('p');
+    t.className = 'grupo-titulo';
+    t.textContent = titulo;
+    caixa.appendChild(t);
+    itens.forEach(function(s,i){
+      var l = document.createElement('label');
+      l.className = 'op';
+      l.innerHTML = '<input type="checkbox" data-i="'+i+'" data-tipo="'+prefixo+'">'
+        + '<span class="nome"></span><span class="val">'+moeda(s.preco)+'</span>';
+      l.querySelector('.nome').textContent = s.nome;
+      caixa.appendChild(l);
+    });
+  }
+
+  var caixaS = document.getElementById('opcoes');
+  var caixaP = document.getElementById('opcoes-produtos');
+  montar(caixaS, servicos, 'Serviços', 's');
+  montar(caixaP, produtos, 'Produtos para levar', 'p');
 
   /* horários de 8h às 18h30 */
   var sel = document.getElementById('hora');
@@ -59,46 +76,63 @@
   var elTempo = document.getElementById('tempo');
 
   function escolhidos(){
-    return [].filter.call(caixa.querySelectorAll('input'), function(c){ return c.checked; })
-             .map(function(c){ return servicos[parseInt(c.dataset.i,10)]; });
+    var s = [], p = [];
+    [].forEach.call(document.querySelectorAll('#opcoes input, #opcoes-produtos input'), function(c){
+      if(!c.checked) return;
+      var i = parseInt(c.dataset.i,10);
+      (c.dataset.tipo === 'p' ? p : s).push((c.dataset.tipo === 'p' ? produtos : servicos)[i]);
+    });
+    return {servicos:s, produtos:p};
   }
 
   function atualizar(){
-    var sel = escolhidos();
-    var total = sel.reduce(function(a,s){ return a + s.preco; }, 0);
-    var min = sel.reduce(function(a,s){ return a + s.min; }, 0);
-    elValor.textContent = 'R$ ' + total.toFixed(0);
-    if(!sel.length){ elTempo.textContent = 'nenhum serviço escolhido'; return; }
-    var txt = min >= 60 ? Math.floor(min/60) + 'h' + (min%60 ? (min%60) : '') : min + ' min';
-    elTempo.textContent = sel.length + (sel.length>1 ? ' serviços' : ' serviço') + ' · cerca de ' + txt;
+    var e = escolhidos();
+    var todos = e.servicos.concat(e.produtos);
+    var total = todos.reduce(function(a,x){ return a + x.preco; }, 0);
+    var min = e.servicos.reduce(function(a,x){ return a + x.min; }, 0);
+    elValor.textContent = moeda(total);
+    if(!todos.length){ elTempo.textContent = 'nada escolhido ainda'; return; }
+    var partes = [];
+    if(e.servicos.length) partes.push(e.servicos.length + (e.servicos.length>1?' serviços':' serviço'));
+    if(e.produtos.length) partes.push(e.produtos.length + (e.produtos.length>1?' produtos':' produto'));
+    if(min) partes.push('cerca de ' + (min>=60 ? Math.floor(min/60)+'h'+(min%60?(min%60):'') : min+' min'));
+    elTempo.textContent = partes.join(' · ');
   }
 
-  caixa.addEventListener('change', atualizar);
+  caixaS.addEventListener('change', atualizar);
+  caixaP.addEventListener('change', atualizar);
   atualizar();
 
   document.getElementById('enviar').addEventListener('click', function(){
-    var sel = escolhidos();
-    if(!sel.length){
-      alert('Escolha pelo menos um serviço para montar o atendimento.');
+    var e = escolhidos();
+    if(!e.servicos.length && !e.produtos.length){
+      alert('Escolha pelo menos um serviço ou produto.');
       return;
     }
     var nome = (document.getElementById('nome').value || '').trim();
     var dia = document.getElementById('dia').value;
     var hora = document.getElementById('hora').value;
-    var total = sel.reduce(function(a,s){ return a + s.preco; }, 0);
+    var total = e.servicos.concat(e.produtos).reduce(function(a,x){ return a + x.preco; }, 0);
 
-    var linhas = [];
-    linhas.push('Fala Henrique! Vim pelo site e queria marcar um horário.');
-    linhas.push('');
-    if(nome) linhas.push('Nome: ' + nome);
-    linhas.push('Dia: ' + dia + ' às ' + hora);
-    linhas.push('');
-    linhas.push('Serviços:');
-    sel.forEach(function(s){ linhas.push('• ' + s.nome + ' — R$ ' + s.preco.toFixed(0)); });
-    linhas.push('');
-    linhas.push('Total estimado: R$ ' + total.toFixed(0));
+    var l = [];
+    l.push('Fala Henrique! Vim pelo site e queria marcar um horário.');
+    l.push('');
+    if(nome) l.push('Nome: ' + nome);
+    l.push('Dia: ' + dia + ' às ' + hora);
+    if(e.servicos.length){
+      l.push('');
+      l.push('Serviços:');
+      e.servicos.forEach(function(s){ l.push('• ' + s.nome + ' — ' + moeda(s.preco)); });
+    }
+    if(e.produtos.length){
+      l.push('');
+      l.push('Produtos para levar:');
+      e.produtos.forEach(function(s){ l.push('• ' + s.nome + ' — ' + moeda(s.preco)); });
+    }
+    l.push('');
+    l.push('Total estimado: ' + moeda(total));
 
-    window.open('https://wa.me/' + ZAP + '?text=' + encodeURIComponent(linhas.join('\n')), '_blank');
+    window.open('https://wa.me/' + ZAP + '?text=' + encodeURIComponent(l.join('\n')), '_blank');
   });
 
   /* aberto agora? */
