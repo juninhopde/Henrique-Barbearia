@@ -139,15 +139,54 @@
   (function(){
     var agora = new Date();
     var d = agora.getDay(), h = agora.getHours() + agora.getMinutes()/60;
-    var aberto = d >= 1 && d <= 6 && h >= 8 && h < 19;
+    var fechaHoje = d === 6 ? 16 : 19;
+    var aberto = d >= 1 && d <= 6 && h >= 8 && h < fechaHoje;
     var box = document.getElementById('status');
     var bol = box.querySelector('.bolinha');
     var txt = box.querySelector('span:last-child');
     if(aberto){
-      txt.textContent = 'Aberto agora — fecha às 19h';
+      txt.textContent = d === 6 ? 'Aberto agora — fecha às 16h (ou mais tarde, se combinar antes)' : 'Aberto agora — fecha às 19h';
     } else {
       bol.classList.add('off');
-      txt.textContent = d === 0 ? 'Fechado hoje — abre segunda às 8h' : (h < 8 ? 'Fechado — abre hoje às 8h' : 'Fechado — abre amanhã às 8h');
+      if(d === 0){ txt.textContent = 'Fechado hoje — abre segunda às 8h'; }
+      else if(d === 6 && h >= fechaHoje){ txt.textContent = 'Fechado — combine pelo WhatsApp para horário estendido'; }
+      else if(h < 8){ txt.textContent = 'Fechado — abre hoje às 8h'; }
+      else { txt.textContent = d === 5 ? 'Fechado — abre amanhã às 8h (sábado até 16h)' : 'Fechado — abre amanhã às 8h'; }
     }
+  })();
+
+  /* galeria com lightbox */
+  (function(){
+    var botoes = [].slice.call(document.querySelectorAll('#mosaico button'));
+    if(!botoes.length) return;
+    var lb = document.getElementById('lightbox');
+    var lbImg = document.getElementById('lb-img');
+    var atual = 0;
+
+    function abrir(i){
+      atual = (i + botoes.length) % botoes.length;
+      var b = botoes[atual];
+      lbImg.src = b.dataset.full;
+      lbImg.alt = b.querySelector('img').alt;
+      lb.classList.add('aberto');
+      lb.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+    }
+    function fechar(){
+      lb.classList.remove('aberto');
+      lb.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+    botoes.forEach(function(b,i){ b.addEventListener('click', function(){ abrir(i); }); });
+    document.getElementById('lb-fechar').addEventListener('click', fechar);
+    document.getElementById('lb-prev').addEventListener('click', function(){ abrir(atual-1); });
+    document.getElementById('lb-next').addEventListener('click', function(){ abrir(atual+1); });
+    lb.addEventListener('click', function(e){ if(e.target === lb) fechar(); });
+    document.addEventListener('keydown', function(e){
+      if(!lb.classList.contains('aberto')) return;
+      if(e.key === 'Escape') fechar();
+      if(e.key === 'ArrowLeft') abrir(atual-1);
+      if(e.key === 'ArrowRight') abrir(atual+1);
+    });
   })();
 })();
